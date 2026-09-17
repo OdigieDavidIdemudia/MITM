@@ -48,6 +48,10 @@ def report_ad():
         print(f"❌ Error updating Squid: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({"status": "online", "message": "MITM Server is listening"}), 200
+
 if __name__ == '__main__':
     # Listen on all network interfaces on port 5000
     app.run(host='0.0.0.0', port=5000)
