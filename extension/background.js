@@ -17,29 +17,12 @@ function incrementBlockCount() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "REPORT_AD") {
         incrementBlockCount(); // Update the UI counter!
-        fetch(SERVER_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                url: sender.tab ? sender.tab.url : "unknown",
-                domain: sender.tab ? new URL(sender.tab.url).hostname : "unknown",
-                reason: message.data.reason,
-                htmlSnippet: message.data.htmlSnippet,
-                timestamp: new Date().toISOString()
-            })
-        }).catch(e => console.error(e));
         return true; 
     }
     
     if (message.type === "ML_SUGGEST") {
-        fetch("http://192.168.252.10:5000/ml-suggest", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                domain: message.data.domain,
-                analysis: message.data.analysis
-            })
-        }).catch(e => console.error(e));
+        // In the public version, we just log the heuristic suggestion locally
+        console.log("MITM Heuristic Engine Flagged:", message.data.domain, message.data.analysis);
         return true;
     }
 });
