@@ -5,6 +5,7 @@ import datetime
 import subprocess
 import os
 import json
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +19,7 @@ LISTS = {
 }
 HTPASSWD_FILE = os.path.join(SQUID_DIR, "passwd")
 DB_FILE = "telemetry.json"
+SQUIDGUARD_CONF = "/etc/squidguard/squidGuard.conf"
 
 # Ensure files exist
 for name, path in LISTS.items():
@@ -129,6 +131,54 @@ def manage_lists(category):
             write_list(category, domains)
             reload_squid()
         return jsonify({"status": "removed"})
+
+@app.route('/api/squidguard', methods=['GET', 'POST'])
+@requires_auth
+def manage_squidguard():
+    if not os.path.exists(SQUIDGUARD_CONF):
+        return jsonify({"error": "squidGuard.conf not found"}), 404
+
+    if request.method == 'GET':
+        with open(SQUIDGUARD_CONF, 'r') as f:
+            content = f.read()
+        
+        dests = re.findall(r'dest\s+(\w+)\s*\{', content)
+        pass_match = re.search(r'pass\s+(.*?)\n', content)
+        pass_rules = pass_match.group(1).split() if pass_match else []
+        
+        categories = []
+        for d in dests:
+            categories.append({
+                "name": d.capitalize(),
+                "id": d,
+                "blocked": f"!{d}" in pass_rules
+            })
+        return jsonify({"categories": categories})
+        
+    if request.method == 'POST':
+        category = request.json.get('category')
+        block = request.json.get('block')
+        
+        with open(SQUIDGUARD_CONF, 'r') as f:
+            lines = f.readlines()
+            
+        for i, line in enumerate(lines):
+            if 'pass ' in line and 'all' in line:
+                parts = line.strip().split()
+                if block:
+                    if f"!{category}" not in parts:
+                        parts.insert(1, f"!{category}")
+                else:
+                    if f"!{category}" in parts:
+                        parts.remove(f"!{category}")
+                lines[i] = "            " + " ".join(parts) + "\n"
+                break
+                
+        with open(SQUIDGUARD_CONF, 'w') as f:
+            f.writelines(lines)
+            
+        reload_squid()
+        return jsonify({"status": "success"})
 
 @app.route('/api/users', methods=['GET', 'POST', 'DELETE'])
 @requires_auth
