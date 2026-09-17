@@ -87,19 +87,19 @@
 
         <!-- CATEGORIES -->
         <div id="categories" class="view">
-            <h2>Domain Categories</h2>
+            <h2>Domain Policy Rules</h2>
             <div class="card">
                 <div class="input-group">
-                    <select id="catSelect" onchange="loadCategory()">
-                        <option value="ads">Ads & Tracking</option>
-                        <option value="streaming">Streaming & Media</option>
-                        <option value="whitelist">Whitelist</option>
+                    <select id="catSelect">
+                        <option value="ads">Ads & Tracking (Block)</option>
+                        <option value="streaming">Streaming & Media (Block)</option>
+                        <option value="whitelist">Whitelist (Allow)</option>
                     </select>
                     <input type="text" id="domainInput" placeholder="domain.com">
-                    <button class="primary" onclick="addDomain()">Add</button>
+                    <button class="primary" onclick="addDomain()">Add Rule</button>
                 </div>
                 <table id="domainTable">
-                    <thead><tr><th>Domain</th><th style="width:100px;">Action</th></tr></thead>
+                    <thead><tr><th>Domain</th><th>Category</th><th>Policy</th><th style="width:100px;">Action</th></tr></thead>
                     <tbody id="domainList"></tbody>
                 </table>
             </div>
@@ -151,7 +151,7 @@
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
             if(tabId === 'dashboard') loadStats();
-            if(tabId === 'categories') loadCategory();
+            if(tabId === 'categories') loadAllRules();
             if(tabId === 'users') loadUsers();
             if(tabId === 'ml') loadML();
         }
@@ -163,26 +163,32 @@
             document.getElementById('stat-ml').innerText = data.suggestions || 0;
         }
 
-        async function loadCategory() {
-            const cat = document.getElementById('catSelect').value;
-            const res = await fetch(`/api/lists/${cat}`);
+        async function loadAllRules() {
+            const res = await fetch('/api/all_rules');
             const data = await res.json();
             const tbody = document.getElementById('domainList');
             tbody.innerHTML = '';
-            data.domains.forEach(d => {
-                tbody.innerHTML += `<tr><td>${d}</td><td><button class="danger" onclick="removeDomain('${cat}','${d}')">DEL</button></td></tr>`;
+            data.rules.forEach(r => {
+                const badgeStr = r.policy === 'allowed' ? '<span class="badge" style="background:var(--green)">ALLOWED</span>' : '<span class="badge" style="background:var(--red); color:white;">BLOCKED</span>';
+                tbody.innerHTML += `<tr>
+                    <td>${r.domain}</td>
+                    <td>${r.category.toUpperCase()}</td>
+                    <td>${badgeStr}</td>
+                    <td><button class="danger" onclick="removeDomain('${r.category}','${r.domain}')">DEL</button></td>
+                </tr>`;
             });
         }
         async function addDomain() {
             const cat = document.getElementById('catSelect').value;
             const domain = document.getElementById('domainInput').value;
+            if(!domain) return;
             await fetch(`/api/lists/${cat}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({domain}) });
             document.getElementById('domainInput').value = '';
-            loadCategory();
+            loadAllRules();
         }
         async function removeDomain(cat, domain) {
             await fetch(`/api/lists/${cat}`, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({domain}) });
-            loadCategory();
+            loadAllRules();
         }
 
         async function loadUsers() {

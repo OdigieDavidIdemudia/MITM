@@ -94,6 +94,16 @@ def get_stats():
     stats['suggestions'] = len(db.get('suggestions', []))
     return jsonify(stats)
 
+@app.route('/api/all_rules', methods=['GET'])
+@requires_auth
+def get_all_rules():
+    rules = []
+    for cat in LISTS.keys():
+        policy = "allowed" if cat == "whitelist" else "blocked"
+        for dom in read_list(cat):
+            rules.append({"domain": dom, "category": cat, "policy": policy})
+    return jsonify({"rules": rules})
+
 @app.route('/api/lists/<category>', methods=['GET', 'POST', 'DELETE'])
 @requires_auth
 def manage_lists(category):
