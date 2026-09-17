@@ -12,8 +12,21 @@ function isDomainFriendly(domain) {
 // -------------------------------------------------------------------------
 const scriptInjection = document.createElement('script');
 scriptInjection.textContent = `
+    const WHITELIST = ['movieboxhd.net', 'mzfi.me', 'google.com', 'accounts.google.com'];
     const originalOpen = window.open;
+    
     window.open = function(url, name, features) {
+        try {
+            let targetDomain = url ? new URL(url, window.location.origin).hostname : "";
+            const isFriendly = WHITELIST.some(d => targetDomain.includes(d));
+            
+            // If the popup is going to Google for login, let it through!
+            if (targetDomain && isFriendly) {
+                console.log("🛡️ MITM ALLOWED friendly window.open to:", url);
+                return originalOpen.apply(this, arguments);
+            }
+        } catch(e) {}
+
         console.log("🛡️ MITM STEALTH BLOCKED window.open to:", url);
         return { closed: false, focus: function() {}, close: function() {}, postMessage: function() {}, document: { write: function(){} } };
     };
@@ -21,6 +34,11 @@ scriptInjection.textContent = `
     const originalClick = HTMLElement.prototype.click;
     HTMLElement.prototype.click = function() {
         if (this.tagName === 'A' && this.target === '_blank') {
+            try {
+                let targetDomain = new URL(this.href, window.location.origin).hostname;
+                const isFriendly = WHITELIST.some(d => targetDomain.includes(d));
+                if (isFriendly) return originalClick.apply(this, arguments);
+            } catch(e) {}
             return;
         }
         return originalClick.apply(this, arguments);
