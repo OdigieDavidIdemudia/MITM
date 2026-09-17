@@ -1,0 +1,18 @@
+/* This CSS will be injected into every webpage to force-hide known ad patterns */
+
+/* Hide elements with classes or IDs that commonly relate to overlays/ads */
+[class*="overlay-ad"],
+[id*="overlay-ad"],
+[class*="clickjack"],
+.transparent-trap {
+    display: none !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    z-index: -9999 !important;
+}
+
+/* 
+  If you find specific sites that use specific class names for their transparent overlays, 
+  you can add them here. For example:
+  .annoying-popup-wrapper { display: none !important; }
+*/

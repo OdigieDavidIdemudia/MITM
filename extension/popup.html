@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="icon.png" alt="Logo" class="logo">
+            <h1>MITM Shield</h1>
+        </div>
+        
+        <div class="status-indicator">
+            <div class="pulse-ring"></div>
+            <span id="server-status">Uplink Active</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span id="ads-blocked" class="number">0</span>
+                <span class="label">Threats Sniped</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            Syncing telemetry to 192.168.252.10
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
