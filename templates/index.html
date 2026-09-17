@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MITM Proxy Dashboard</title>
+    <style>
+        body { 
+            font-family: 'Space Grotesk', system-ui, sans-serif; 
+            background: #fff4e0; 
+            color: #000; 
+            padding: 2rem; 
+            margin: 0; 
+        }
+        .container { 
+            max-width: 700px; 
+            margin: 0 auto; 
+        }
+        h1 { 
+            border: 3px solid #000; 
+            display: inline-block; 
+            padding: 0.5rem 1rem; 
+            background: #a6fa83; 
+            box-shadow: 4px 4px 0 #000; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            font-size: 1.5rem; 
+            margin-bottom: 2rem;
+        }
+        .card { 
+            border: 3px solid #000; 
+            background: #fff; 
+            padding: 1.5rem; 
+            box-shadow: 5px 5px 0 #000; 
+            border-radius: 4px; 
+        }
+        .input-group { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 1.5rem; 
+        }
+        input[type="text"] { 
+            flex-grow: 1; 
+            border: 3px solid #000; 
+            padding: 0.75rem; 
+            font-size: 1rem; 
+            font-family: monospace; 
+            outline: none; 
+            background: #f4f4f4;
+        }
+        input[type="text"]:focus { 
+            background: #e0f4ff; 
+        }
+        button { 
+            border: 3px solid #000; 
+            background: #ff90e8; 
+            padding: 0.75rem 1.5rem; 
+            font-weight: 900; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            box-shadow: 3px 3px 0 #000; 
+            transition: transform 0.1s, box-shadow 0.1s; 
+        }
+        button:active { 
+            transform: translate(3px, 3px); 
+            box-shadow: 0px 0px 0 #000; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            border: 3px solid #000; 
+            background: #fff; 
+            margin-top: 1rem;
+        }
+        th, td { 
+            border: 2px solid #000; 
+            padding: 0.75rem; 
+            text-align: left; 
+        }
+        th { 
+            background: #fce698; 
+            text-transform: uppercase; 
+            font-weight: 900; 
+            font-size: 0.9rem;
+        }
+        td {
+            font-family: monospace;
+            font-size: 1rem;
+        }
+        .btn-delete { 
+            background: #ff7b72; 
+            padding: 0.4rem 0.8rem; 
+            font-size: 0.8rem; 
+            box-shadow: 2px 2px 0 #000;
+        }
+        .btn-delete:active {
+            transform: translate(2px, 2px); 
+            box-shadow: 0px 0px 0 #000; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Proxy Dashboard</h1>
+        <div class="card">
+            <div class="input-group">
+                <input type="text" id="domainInput" placeholder="e.g. bad-ads.com" autocomplete="off">
+                <button onclick="addDomain()">Block Domain</button>
+            </div>
+            <table id="domainTable">
+                <thead>
+                    <tr>
+                        <th>Blocked Domain</th>
+                        <th style="width: 100px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="domainList">
+                    <!-- Loaded via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function fetchDomains() {
+            const response = await fetch('/api/rules');
+            const data = await response.json();
+            const tbody = document.getElementById('domainList');
+            tbody.innerHTML = '';
+            
+            data.domains.forEach(domain => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${domain}</td>
+                    <td><button class="btn-delete" onclick="removeDomain('${domain}')">REMOVE</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function addDomain() {
+            const input = document.getElementById('domainInput');
+            const domain = input.value.trim();
+            if (!domain) return;
+
+            await fetch('/api/rules', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domain })
+            });
+            input.value = '';
+            fetchDomains();
+        }
+
+        async function removeDomain(domain) {
+            await fetch('/api/rules', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domain })
+            });
+            fetchDomains();
+        }
+
+        // Load initially
+        fetchDomains();
+    </script>
+</body>
+</html>
