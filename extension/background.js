@@ -30,6 +30,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }).catch(e => console.error(e));
         return true; 
     }
+    
+    if (message.type === "ML_SUGGEST") {
+        fetch("http://192.168.252.10:5000/ml-suggest", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                domain: message.data.domain,
+                analysis: message.data.analysis
+            })
+        }).catch(e => console.error(e));
+        return true;
+    }
 });
 
 chrome.webNavigation.onCreatedNavigationTarget.addListener((details) => {

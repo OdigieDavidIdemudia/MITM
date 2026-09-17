@@ -8,22 +8,36 @@ function isDomainFriendly(domain) {
 }
 
 // -------------------------------------------------------------------------
-// PHASE 1: STEALTH POP-UP BLOCKER
+// PHASE 1: STEALTH POP-UP BLOCKER & HEURISTIC ENGINE
 // -------------------------------------------------------------------------
 const scriptInjection = document.createElement('script');
 scriptInjection.textContent = `
     const WHITELIST = ['movieboxhd.net', 'mzfi.me', 'google.com', 'accounts.google.com'];
     const originalOpen = window.open;
     
+    function scoreDomain(domain) {
+        let score = 0; let flags = [];
+        if (!domain) return {score, flags};
+        const noVowels = domain.replace(/[aeiou.-]/ig, '');
+        if (noVowels.length > 8 && (noVowels.length / domain.length) > 0.7) { score += 50; flags.push("high_entropy"); }
+        if (/(ad|track|analytics|metric|click|pop|banner)/i.test(domain)) { score += 40; flags.push("suspicious_keyword"); }
+        if (/\\.(xyz|top|win|bid|stream)$/i.test(domain)) { score += 30; flags.push("spam_tld"); }
+        return { score, flags };
+    }
+    
     window.open = function(url, name, features) {
         try {
             let targetDomain = url ? new URL(url, window.location.origin).hostname : "";
             const isFriendly = WHITELIST.some(d => targetDomain.includes(d));
             
-            // If the popup is going to Google for login, let it through!
             if (targetDomain && isFriendly) {
-                console.log("🛡️ MITM ALLOWED friendly window.open to:", url);
                 return originalOpen.apply(this, arguments);
+            } else if (targetDomain) {
+                let analysis = scoreDomain(targetDomain);
+                if (analysis.score >= 40) {
+                    // Send message out of isolated world to extension world via custom event
+                    window.dispatchEvent(new CustomEvent('MITM_ML_SUGGEST', { detail: { domain: targetDomain, analysis: analysis } }));
+                }
             }
         } catch(e) {}
 
@@ -46,6 +60,14 @@ scriptInjection.textContent = `
 `;
 (document.head || document.documentElement).appendChild(scriptInjection);
 scriptInjection.remove();
+
+// Bridge to listen to the ML engine from the page context
+window.addEventListener('MITM_ML_SUGGEST', (e) => {
+    chrome.runtime.sendMessage({
+        type: "ML_SUGGEST",
+        data: e.detail
+    });
+});
 
 // -------------------------------------------------------------------------
 // PHASE 2: CAPTURE-PHASE EVENT INTERCEPTOR (With Whitelist)

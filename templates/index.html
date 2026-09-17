@@ -3,166 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MITM Proxy Dashboard</title>
+    <title>MITM Proxy Admin</title>
     <style>
+        :root {
+            --yellow: #fce698; --pink: #ff90e8; --green: #a6fa83;
+            --blue: #90d4ff; --red: #ff7b72; --bg: #fff4e0; --black: #000;
+        }
         body { 
             font-family: 'Space Grotesk', system-ui, sans-serif; 
-            background: #fff4e0; 
-            color: #000; 
-            padding: 2rem; 
-            margin: 0; 
+            background: var(--bg); color: var(--black); 
+            margin: 0; display: flex; height: 100vh; overflow: hidden;
         }
-        .container { 
-            max-width: 700px; 
-            margin: 0 auto; 
+        /* SIDEBAR */
+        .sidebar {
+            width: 250px; background: #fff; border-right: 4px solid var(--black);
+            display: flex; flex-direction: column;
         }
-        h1 { 
-            border: 3px solid #000; 
-            display: inline-block; 
-            padding: 0.5rem 1rem; 
-            background: #a6fa83; 
-            box-shadow: 4px 4px 0 #000; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            font-size: 1.5rem; 
-            margin-bottom: 2rem;
+        .sidebar-header {
+            padding: 20px; background: var(--blue); border-bottom: 4px solid var(--black);
+            font-weight: 900; font-size: 1.2rem; text-transform: uppercase;
         }
-        .card { 
-            border: 3px solid #000; 
-            background: #fff; 
-            padding: 1.5rem; 
-            box-shadow: 5px 5px 0 #000; 
-            border-radius: 4px; 
+        .nav-item {
+            padding: 15px 20px; font-weight: 900; border-bottom: 2px solid var(--black);
+            cursor: pointer; text-transform: uppercase;
         }
-        .input-group { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 1.5rem; 
-        }
-        input[type="text"] { 
-            flex-grow: 1; 
-            border: 3px solid #000; 
-            padding: 0.75rem; 
-            font-size: 1rem; 
-            font-family: monospace; 
-            outline: none; 
-            background: #f4f4f4;
-        }
-        input[type="text"]:focus { 
-            background: #e0f4ff; 
-        }
-        button { 
-            border: 3px solid #000; 
-            background: #ff90e8; 
-            padding: 0.75rem 1.5rem; 
-            font-weight: 900; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            box-shadow: 3px 3px 0 #000; 
-            transition: transform 0.1s, box-shadow 0.1s; 
-        }
-        button:active { 
-            transform: translate(3px, 3px); 
-            box-shadow: 0px 0px 0 #000; 
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            border: 3px solid #000; 
-            background: #fff; 
-            margin-top: 1rem;
-        }
-        th, td { 
-            border: 2px solid #000; 
-            padding: 0.75rem; 
-            text-align: left; 
-        }
-        th { 
-            background: #fce698; 
-            text-transform: uppercase; 
-            font-weight: 900; 
-            font-size: 0.9rem;
-        }
-        td {
-            font-family: monospace;
-            font-size: 1rem;
-        }
-        .btn-delete { 
-            background: #ff7b72; 
-            padding: 0.4rem 0.8rem; 
-            font-size: 0.8rem; 
-            box-shadow: 2px 2px 0 #000;
-        }
-        .btn-delete:active {
-            transform: translate(2px, 2px); 
-            box-shadow: 0px 0px 0 #000; 
-        }
+        .nav-item:hover { background: var(--yellow); }
+        .nav-item.active { background: var(--pink); border-right: 5px solid var(--black); }
+        
+        /* CONTENT */
+        .content { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        .view { display: none; }
+        .view.active { display: block; }
+        
+        h2 { font-weight: 900; text-transform: uppercase; margin-top: 0; display: inline-block; background: var(--yellow); padding: 5px 10px; border: 3px solid var(--black); box-shadow: 4px 4px 0 var(--black); }
+        
+        /* CARDS & FORMS */
+        .card { background: #fff; border: 3px solid var(--black); padding: 20px; margin-bottom: 20px; box-shadow: 5px 5px 0 var(--black); border-radius: 4px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        input, select { flex-grow: 1; border: 3px solid var(--black); padding: 10px; font-weight: bold; background: #f4f4f4; outline: none; }
+        input:focus { background: var(--blue); }
+        
+        button { border: 3px solid var(--black); padding: 10px 20px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 3px 3px 0 var(--black); transition: 0.1s; background: #fff; }
+        button:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--black); }
+        button.primary { background: var(--green); }
+        button.danger { background: var(--red); }
+        
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; border: 3px solid var(--black); background: #fff; }
+        th, td { border: 2px solid var(--black); padding: 10px; text-align: left; }
+        th { background: var(--yellow); font-weight: 900; text-transform: uppercase; }
+        td { font-family: monospace; font-size: 1rem; }
+        
+        /* BADGES */
+        .badge { padding: 4px 8px; border: 2px solid var(--black); font-size: 0.8rem; font-weight: bold; background: var(--yellow); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🛡️ Proxy Dashboard</h1>
-        <div class="card">
-            <div class="input-group">
-                <input type="text" id="domainInput" placeholder="e.g. bad-ads.com" autocomplete="off">
-                <button onclick="addDomain()">Block Domain</button>
+
+    <div class="sidebar">
+        <div class="sidebar-header">🛡️ MITM Admin</div>
+        <div class="nav-item active" onclick="switchTab('dashboard')">Overview</div>
+        <div class="nav-item" onclick="switchTab('categories')">Categories</div>
+        <div class="nav-item" onclick="switchTab('users')">Proxy Users</div>
+        <div class="nav-item" onclick="switchTab('ml')">🧠 ML Insights</div>
+        <div class="nav-item" onclick="switchTab('system')">System Actions</div>
+    </div>
+
+    <div class="content">
+        <!-- OVERVIEW -->
+        <div id="dashboard" class="view active">
+            <h2>System Overview</h2>
+            <div class="card" style="display: flex; gap: 20px;">
+                <div>
+                    <h3>Ads Blocked</h3>
+                    <p id="stat-ads" style="font-size: 3rem; font-weight: 900; margin: 0;">0</p>
+                </div>
+                <div>
+                    <h3>ML Suggestions</h3>
+                    <p id="stat-ml" style="font-size: 3rem; font-weight: 900; margin: 0; color: var(--pink);">0</p>
+                </div>
             </div>
-            <table id="domainTable">
-                <thead>
-                    <tr>
-                        <th>Blocked Domain</th>
-                        <th style="width: 100px;">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="domainList">
-                    <!-- Loaded via JS -->
-                </tbody>
-            </table>
+        </div>
+
+        <!-- CATEGORIES -->
+        <div id="categories" class="view">
+            <h2>Domain Categories</h2>
+            <div class="card">
+                <div class="input-group">
+                    <select id="catSelect" onchange="loadCategory()">
+                        <option value="ads">Ads & Tracking</option>
+                        <option value="streaming">Streaming & Media</option>
+                        <option value="whitelist">Whitelist</option>
+                    </select>
+                    <input type="text" id="domainInput" placeholder="domain.com">
+                    <button class="primary" onclick="addDomain()">Add</button>
+                </div>
+                <table id="domainTable">
+                    <thead><tr><th>Domain</th><th style="width:100px;">Action</th></tr></thead>
+                    <tbody id="domainList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- USERS -->
+        <div id="users" class="view">
+            <h2>Proxy Users</h2>
+            <div class="card">
+                <div class="input-group">
+                    <input type="text" id="user" placeholder="Username">
+                    <input type="password" id="pass" placeholder="Password">
+                    <button class="primary" onclick="addUser()">Add / Update User</button>
+                </div>
+                <table>
+                    <thead><tr><th>Username</th><th style="width:100px;">Action</th></tr></thead>
+                    <tbody id="userList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ML INSIGHTS -->
+        <div id="ml" class="view">
+            <h2>🧠 ML Insights & Heuristics</h2>
+            <p><strong>Extension reported these suspicious domains based on tracking patterns.</strong></p>
+            <div class="card">
+                <table>
+                    <thead><tr><th>Domain</th><th>Score & Flags</th><th>Action</th></tr></thead>
+                    <tbody id="mlList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SYSTEM -->
+        <div id="system" class="view">
+            <h2>System Actions</h2>
+            <div class="card" style="display: flex; gap: 15px;">
+                <button onclick="sysAction('reload')">Soft Reload (Apply Rules)</button>
+                <button class="primary" onclick="sysAction('restart')">Hard Restart Squid</button>
+                <button class="danger" onclick="sysAction('clear_cache')">Wipe Proxy Cache</button>
+            </div>
         </div>
     </div>
 
     <script>
-        async function fetchDomains() {
-            const response = await fetch('/api/rules');
-            const data = await response.json();
+        function switchTab(tabId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            if(tabId === 'dashboard') loadStats();
+            if(tabId === 'categories') loadCategory();
+            if(tabId === 'users') loadUsers();
+            if(tabId === 'ml') loadML();
+        }
+
+        async function loadStats() {
+            const res = await fetch('/api/stats');
+            const data = await res.json();
+            document.getElementById('stat-ads').innerText = data.ads || 0;
+            document.getElementById('stat-ml').innerText = data.suggestions || 0;
+        }
+
+        async function loadCategory() {
+            const cat = document.getElementById('catSelect').value;
+            const res = await fetch(`/api/lists/${cat}`);
+            const data = await res.json();
             const tbody = document.getElementById('domainList');
             tbody.innerHTML = '';
-            
-            data.domains.forEach(domain => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${domain}</td>
-                    <td><button class="btn-delete" onclick="removeDomain('${domain}')">REMOVE</button></td>
-                `;
-                tbody.appendChild(tr);
+            data.domains.forEach(d => {
+                tbody.innerHTML += `<tr><td>${d}</td><td><button class="danger" onclick="removeDomain('${cat}','${d}')">DEL</button></td></tr>`;
             });
         }
-
         async function addDomain() {
-            const input = document.getElementById('domainInput');
-            const domain = input.value.trim();
-            if (!domain) return;
-
-            await fetch('/api/rules', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ domain })
-            });
-            input.value = '';
-            fetchDomains();
+            const cat = document.getElementById('catSelect').value;
+            const domain = document.getElementById('domainInput').value;
+            await fetch(`/api/lists/${cat}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({domain}) });
+            document.getElementById('domainInput').value = '';
+            loadCategory();
+        }
+        async function removeDomain(cat, domain) {
+            await fetch(`/api/lists/${cat}`, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({domain}) });
+            loadCategory();
         }
 
-        async function removeDomain(domain) {
-            await fetch('/api/rules', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ domain })
+        async function loadUsers() {
+            const res = await fetch('/api/users');
+            const data = await res.json();
+            const tbody = document.getElementById('userList');
+            tbody.innerHTML = '';
+            data.users.forEach(u => {
+                tbody.innerHTML += `<tr><td>${u}</td><td><button class="danger" onclick="removeUser('${u}')">DEL</button></td></tr>`;
             });
-            fetchDomains();
+        }
+        async function addUser() {
+            const username = document.getElementById('user').value;
+            const password = document.getElementById('pass').value;
+            await fetch('/api/users', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username,password}) });
+            document.getElementById('user').value = '';
+            document.getElementById('pass').value = '';
+            loadUsers();
+        }
+        async function removeUser(username) {
+            await fetch('/api/users', { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username}) });
+            loadUsers();
         }
 
-        // Load initially
-        fetchDomains();
+        async function loadML() {
+            const res = await fetch('/api/ml');
+            const data = await res.json();
+            const tbody = document.getElementById('mlList');
+            tbody.innerHTML = '';
+            data.suggestions.forEach(s => {
+                tbody.innerHTML += `
+                <tr>
+                    <td>${s.domain}</td>
+                    <td><span class="badge">Score: ${s.score}</span> ${s.flags.join(', ')}</td>
+                    <td>
+                        <button class="primary" onclick="resolveML('${s.domain}', 'approve')">Block</button>
+                        <button onclick="resolveML('${s.domain}', 'ignore')">Ignore</button>
+                    </td>
+                </tr>`;
+            });
+        }
+        async function resolveML(domain, action) {
+            await fetch('/api/ml', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({domain, action}) });
+            loadML();
+        }
+
+        async function sysAction(action) {
+            await fetch(`/api/system/${action}`, { method:'POST' });
+            alert('Action sent to server!');
+        }
+
+        loadStats(); // Init
     </script>
 </body>
 </html>
