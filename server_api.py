@@ -59,7 +59,7 @@ def write_list(category, domains):
     if not path: return
     with open(path, 'w') as f:
         for domain in domains:
-            if domain: f.write(f".{domain}\n" if category != "whitelist" else f"{domain}\n")
+            if domain: f.write(f".{domain}\n")
 
 def read_db():
     try:
