@@ -1,0 +1,15 @@
+# HTML / Web
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db

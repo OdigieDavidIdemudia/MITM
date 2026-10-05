@@ -1,146 +1,36 @@
-# 🔏 MITM — Proxy Shield
+# MITM
 
-A **network-level ad blocking and content filtering system** built around Squid proxy + SquidGuard, with a Flask management API and a companion **Chrome Extension (MV3)** for per-tab telemetry, filter suggestions, and real-time proxy status monitoring.
+**DISCLAIMER**: This is a proof-of-concept project for educational and authorized security testing purposes only. Unauthorized access to computer networks is illegal.
 
----
+## Purpose
+This repository contains experimental security research and proof-of-concept tools. Use only in controlled environments with proper authorization.
 
-## ✨ Features
+## What it does
+This project demonstrates [core functionality description needed]. It is designed for:
+- Educational security research
+- Authorized penetration testing
+- Red team exercises
 
-### Proxy Management API (Flask)
-- **Dynamic Blocklist Management** — Add/remove domains to `ads`, `streaming`, and `whitelist` categories via REST API. Changes are applied live without proxy restarts.
-- **User Management** — Create and delete proxy authentication users (via `htpasswd`).
-- **SquidGuard Config Sync** — Automatically regenerates and reloads the SquidGuard configuration after blocklist updates.
-- **Telemetry Logging** — Stores browsing events and suggestion logs in a local JSON telemetry database.
-- **Authenticated Admin API** — All management endpoints require HTTP Basic Auth.
+## ⚠️ Legal and ethical notice
+- Use only on systems you own or have explicit written permission to test.
+- Unauthorized access violates laws in most jurisdictions.
+- The authors are not liable for misuse.
 
-### Chrome Extension (MV3)
-- **Tab-Level Execution** — Content script runs at `document_start` across all frames to intercept requests early.
-- **Proxy Shield Status** — Popup shows live proxy connection status.
-- **DRM Detector** — Companion `drm-detector-extension` identifies DRM-protected content (EME/Widevine/PlayReady) on the page.
-- **Telemetry Reporting** — Reports tab navigation events back to the management server.
-- **Domain Suggestions** — Users can suggest domains for blocking/whitelisting directly from the extension popup.
+## Recommended structure
+- `src/` — proof-of-concept code
+- `docs/` — technical documentation
+- `examples/` — usage examples (for authorized testing only)
+- `LICENSE` — clearly stating intended use
 
----
+## Getting started
+1. Read `docs/PURPOSE.md` to understand what this PoC does.
+2. Read the legal notice above.
+3. Only run in authorized environments.
 
-## 🏗️ Architecture
+## Project hygiene
+- Keep this repository private or clearly mark as educational.
+- Do not use for unauthorized testing.
+- Document all assumptions and limitations.
 
-```
-MITM/
-├── server_api.py               # Flask management API
-├── extension/                  # Chrome MV3 Proxy Shield extension
-│   ├── manifest.json
-│   ├── background.js           # Service worker (WebNavigation events)
-│   ├── content.js              # Content script (all_urls, document_start)
-│   ├── cosmetic.css            # Cosmetic ad-hiding rules
-│   ├── popup.html / popup.js   # Extension popup UI
-│   └── icon.png
-├── drm-detector-extension/     # DRM detection extension
-│   ├── manifest.json
-│   ├── background.js
-│   ├── content.js
-│   ├── inject.js               # Injected page script (monitors EME API)
-│   └── popup.html / popup.js
-└── templates/
-    └── index.html              # Admin dashboard web UI
-```
-
----
-
-## 🛠️ Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| Proxy | Squid + SquidGuard |
-| Management API | Python, Flask, Flask-CORS |
-| Auth | HTTP Basic Auth (htpasswd) |
-| Browser extension | Chrome MV3 (Manifest Version 3) |
-| Telemetry storage | Local JSON file |
-
----
-
-## 🚀 Deployment
-
-### Prerequisites
-
-- Linux server with Squid and SquidGuard installed
-- Python 3.10+
-
-### API Server
-
-```bash
-pip install flask flask-cors
-python server_api.py
-# Runs on http://0.0.0.0:5000
-```
-
-### Configure Squid
-
-Point Squid to the blocklists managed by the API:
-
-```
-# /etc/squid/squid.conf
-acl ads dstdomain "/etc/squid/dynamic_ads.txt"
-acl streaming dstdomain "/etc/squid/streaming.txt"
-http_access deny ads
-```
-
-### Load the Chrome Extension
-
-1. Navigate to `chrome://extensions/`
-2. Enable **Developer Mode**
-3. Click **Load unpacked** → select `extension/`
-
----
-
-## 📡 API Reference
-
-### Blocklist Management
-
-```http
-GET  /list/<category>               # Get all domains in a category
-POST /list/<category>/add           # Add domain(s) to a category
-POST /list/<category>/remove        # Remove a domain from a category
-```
-
-### User Management
-
-```http
-POST /users/add                     # Create proxy user
-POST /users/delete                  # Delete proxy user
-```
-
-### Telemetry
-
-```http
-GET  /telemetry                     # Retrieve all telemetry logs
-POST /telemetry/log                 # Submit a browsing event
-POST /telemetry/suggest             # Submit a domain block suggestion
-```
-
-### Admin UI
-
-```http
-GET  /                              # Admin dashboard (browser UI)
-```
-
-> [!IMPORTANT]
-> All management endpoints except `/telemetry/log` and `/telemetry/suggest` require HTTP Basic Auth credentials.
-
----
-
-## 🌐 Extension Permissions
-
-| Permission | Purpose |
-|-----------|---------|
-| `activeTab` | Access currently active tab info |
-| `scripting` | Inject content scripts dynamically |
-| `tabs` | Monitor tab navigation events |
-| `webNavigation` | Hook into navigation lifecycle |
-| `storage` | Persist extension settings locally |
-| `<all_urls>` | Apply content script on all sites |
-
----
-
-## 📄 License
-
-MIT License
+## Status
+This repository has been organized with a standard baseline and clear ethical guidelines.
