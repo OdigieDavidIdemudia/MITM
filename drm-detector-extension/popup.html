@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DRM Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            width: 250px;
+            padding: 15px;
+            background-color: #202124;
+            color: #fff;
+            margin: 0;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 16px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+        #status {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .drm-found {
+            color: #ff5252;
+            font-weight: bold;
+        }
+        .no-drm {
+            color: #69f0ae;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        li {
+            background: #333;
+            margin-bottom: 5px;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h2>DRM Detector</h2>
+    <div id="status">Checking current page...</div>
+    <ul id="drm-list"></ul>
+    <script src="popup.js"></script>
+</body>
+</html>
